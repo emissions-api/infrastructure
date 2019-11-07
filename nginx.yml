@@ -1,0 +1,50 @@
+---
+
+- hosts: server
+  become: yes
+  tasks:
+    - name: install needed software
+      apt:
+        name:
+          - nginx
+          - certbot
+          - python-certbot-nginx
+
+    - name: remove default site
+      file:
+        state: absent
+        path: /etc/nginx/sites-enabled/default
+      notify: reload nginx
+
+    - name: create certificate
+      command: certbot certonly --domain demo.emissions-api.org --nginx --agree-tos -m info@emissions-api.org
+      args:
+        creates: /etc/letsencrypt/live/demo.emissions-api.org/cert.pem
+      notify: reload nginx
+
+    - name: install diffie hellmann paramter
+      copy:
+        src: nginx/dhparam.pem
+        dest: /etc/nginx/dhparam.pem
+        force: yes
+      notify: reload nginx
+
+    - name: install config file for demo.emissions-api.org
+      copy:
+        dest: /etc/nginx/sites-available/demo.emissions-api.org.conf
+        src: nginx/demo.emissions-api.org.conf
+        force: yes
+      notify: reload nginx
+
+    - name: enable demo.emissions-api.org
+      file:
+        state: link
+        src: /etc/nginx/sites-available/demo.emissions-api.org.conf
+        dest: /etc/nginx/sites-enabled/demo.emissions-api.org.conf
+      notify: reload nginx
+
+  handlers:
+    - name: reload nginx
+      service:
+        name: nginx
+        state: reloaded
