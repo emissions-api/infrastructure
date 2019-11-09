@@ -1,0 +1,108 @@
+---
+
+- hosts: server
+  become: yes
+  vars_files:
+    - secret-vars.yml
+  tasks:
+    - name: install needed software
+      become: yes
+      apt:
+        name:
+          - git
+          - python3
+          - python3-gdal
+          - python3-psycopg2
+          - python3-pycurl
+          - python3-numpy
+          - python3-venv
+          - python3-wheel
+
+    - name: create Emissions-API user
+      user:
+        name: emissions-api
+        system: yes
+        home: /opt/emissions-api
+
+    - name: create data directory
+      file:
+        path: /opt/emissions-api/data/
+        owner: emissions-api
+        group: emissions-api
+        state: directory
+
+    - name: create python environment
+      command: python3 -m venv --system-site-packages /opt/emissions-api/env
+      args:
+        creates: /opt/emissions-api/env
+
+    - name: clone Emissions-API repository
+      command: git clone https://github.com/emissions-api/emissions-api.git /opt/emissions-api/emissions-api
+      args:
+        creates: /opt/emissions-api/emissions-api
+
+    - name: install Emissions-API requirements
+      command: /opt/emissions-api/env/bin/pip install -r /opt/emissions-api/emissions-api/requirements.txt
+
+    - name: install gunicorn
+      command: /opt/emissions-api/env/bin/pip install gunicorn
+
+    - name: install Emissions-API config file
+      copy:
+        content: |
+            database: postgresql://emissionsapi:{{ database_emissionsapi_password }}@127.0.0.1/emissionsapi
+            storage: /opt/emissionsapi/data
+            download:
+              date:
+                begin: '2019-02-1T00:00:00.000Z'
+                end: '2019-03-01T00:00:00.000Z'
+              country:
+        dest: /opt/emissions-api/emissions-api.yml
+        force: yes
+        owner: emissions-api
+        group: emissions-api
+        mode: 0600
+
+    - name: ensure correct ownership
+      file:
+        owner: emissions-api
+        group: emissions-api
+        recurse: yes
+        path: /opt/emissions-api
+
+    - name: install Emissions-API service file
+      copy:
+        dest: /lib/systemd/system/emissionsapi-web.service
+        content: |
+            [Unit]
+            Description=Emissions API Web Service
+
+            [Service]
+            ExecStart=/opt/emissions-api/env/bin/gunicorn --workers 4 emissionsapi.web:app
+            WorkingDirectory=/opt/emissions-api/emissions-api/
+            User=emissions-api
+            RestartSec=5
+            Restart=always
+
+            [Install]
+            WantedBy=multi-user.target
+        force: yes
+      notify:
+        - reload systemd
+        - restart emissionsapi-web
+
+    - name: run Emissions-API now and on boot
+      service:
+        name: emissionsapi-web
+        enabled: yes
+        state: started
+
+  handlers:
+    - name: reload systemd
+      systemd:
+        daemon_reload: yes
+
+    - name: restart emissionsapi-web
+      service:
+        name: emissionsapi-web
+        state: restarted
