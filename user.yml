@@ -1,0 +1,41 @@
+---
+
+- hosts: server
+  vars:
+    admins:
+      - sven
+      - hendrik
+
+  tasks:
+    - name: install base tools
+      become: true
+      apt:
+        name:
+          - vim
+          - zsh
+          - htop
+          - iotop
+
+    - name: create admin users
+      become: true
+      user:
+        name: '{{ item }}'
+        groups: sudo
+        append: true
+      loop: '{{ admins }}'
+
+    - name: set up admin authorized keys
+      become: true
+      authorized_key:
+        user: '{{ item }}'
+        state: present
+        key: "{{ lookup('file', 'pub-keys/{{ item }}.pub') }}"
+      loop: '{{ admins }}'
+
+    - name: allow wheel to sudo without a password
+      become: true
+      copy:
+        dest: /etc/sudoers.d/password-less-sudo
+        mode: 0600
+        content: "%sudo ALL=(ALL) NOPASSWD: ALL"
+        force: yes
