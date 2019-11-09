@@ -3,4 +3,5 @@
 - import_playbook: postgresql.yml
 - import_playbook: emissions-api.yml
 - import_playbook: openssh.yml
+- import_playbook: nginx.yml
 
