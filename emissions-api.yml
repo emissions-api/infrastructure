@@ -52,9 +52,10 @@
       command: /opt/emissions-api/env/bin/pip install gunicorn
 
     - name: install Emissions-API config file
-      become_user: emissions-api
       copy:
         content: |
+            ---
+
             database: postgresql://emissionsapi:{{ database_emissionsapi_password }}@127.0.0.1/emissionsapi
             storage: /opt/emissionsapi/data
             download:
@@ -62,11 +63,13 @@
                 begin: '2019-02-1T00:00:00.000Z'
                 end: '2019-03-01T00:00:00.000Z'
               country:
-        dest: /opt/emissions-api/emissions-api.yml
+        dest: /opt/emissions-api/emissions-api/emissionsapi.yml
         force: yes
         owner: emissions-api
         group: emissions-api
         mode: 0600
+      notify:
+        restart emissionsapi-web
 
     - name: install Emissions-API service file
       copy:
