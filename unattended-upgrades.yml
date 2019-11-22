@@ -1,0 +1,13 @@
+---
+
+- hosts: server
+  become: yes
+  tasks:
+    - name: install needed software
+      apt:
+        name: unattended-upgrades
+
+    - name: copy config
+      copy:
+        src: unattended-upgrades/50unattended-upgrades
+        dest: /etc/apt/apt.conf.d/50unattended-upgrades
