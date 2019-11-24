@@ -14,7 +14,7 @@ So you will need to have Ansible installed on your system and on the remote mach
 
 ### Installation
 
-First run the `user.yml` playbook to create the administrative user om the host.
+First run the `user.yml` playbook to create the administrative user on the host.
 
 After that you can run the `setup.yml` which bundles the remaining playbooks.
 You need to have access to the vault for that.
