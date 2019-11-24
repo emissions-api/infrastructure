@@ -5,6 +5,7 @@
     admins:
       - sven
       - hendrik
+      - lars
 
   tasks:
     - name: install base tools
