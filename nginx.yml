@@ -16,10 +16,10 @@
         path: /etc/nginx/sites-enabled/default
       notify: reload nginx
 
-    - name: create certificate
-      command: certbot certonly --domain demo.emissions-api.org --nginx --agree-tos -m info@emissions-api.org
+    - name: create certificate for {{ domain_name }}
+      command: certbot certonly --domain {{ domain_name }} --nginx --agree-tos -m info@emissions-api.org
       args:
-        creates: /etc/letsencrypt/live/demo.emissions-api.org/cert.pem
+        creates: /etc/letsencrypt/live/{{ domain_name }}/cert.pem
       notify: reload nginx
 
     - name: install diffie hellmann paramter
@@ -29,18 +29,18 @@
         force: yes
       notify: reload nginx
 
-    - name: install config file for demo.emissions-api.org
-      copy:
-        dest: /etc/nginx/sites-available/demo.emissions-api.org.conf
-        src: nginx/demo.emissions-api.org.conf
+    - name: install config file for {{ domain_name }}
+      template:
+        dest: /etc/nginx/sites-available/{{ domain_name }}.conf
+        src: nginx/server.conf
         force: yes
       notify: reload nginx
 
-    - name: enable demo.emissions-api.org
+    - name: enable {{ domain_name }}
       file:
         state: link
-        src: /etc/nginx/sites-available/demo.emissions-api.org.conf
-        dest: /etc/nginx/sites-enabled/demo.emissions-api.org.conf
+        src: /etc/nginx/sites-available/{{ domain_name }}.conf
+        dest: /etc/nginx/sites-enabled/{{ domain_name }}.conf
       notify: reload nginx
 
   handlers:
