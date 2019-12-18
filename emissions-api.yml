@@ -10,15 +10,14 @@
         name:
           - git
           - python3
-          - python3-gdal
-          - python3-psycopg2
-          - python3-pycurl
-          - python3-numpy
           - python3-venv
-          - python3-wheel
+          - python3-dev
+          - build-essential
+          - libcurl4-gnutls-dev
+          - libgnutls28-dev
+          - libpq-dev
 
     - name: create Emissions-API user
-      become_user: emissions-api
       user:
         name: emissions-api
         system: yes
@@ -33,7 +32,7 @@
 
     - name: create python environment
       become_user: emissions-api
-      command: python3 -m venv --system-site-packages /opt/emissions-api/env
+      command: python3 -m venv /opt/emissions-api/env
       args:
         creates: /opt/emissions-api/env
 
@@ -46,10 +45,6 @@
     - name: install Emissions-API requirements
       become_user: emissions-api
       command: /opt/emissions-api/env/bin/pip install -r /opt/emissions-api/emissions-api/requirements.txt
-
-    - name: install gunicorn
-      become_user: emissions-api
-      command: /opt/emissions-api/env/bin/pip install gunicorn
 
     - name: install Emissions-API config file
       copy:
