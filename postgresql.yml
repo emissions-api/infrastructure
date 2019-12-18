@@ -10,6 +10,7 @@
         name:
           - postgresql
           - postgis
+          - python3-psycopg2
 
     - name: create emissionsapi postgresql user
       become: yes
