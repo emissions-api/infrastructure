@@ -3,12 +3,6 @@
 - hosts: server
   become: yes
   tasks:
-    - name: cool motd
-      copy:
-        force: yes
-        src: openssh/motd
-        dest: /etc/motd
-
     - name: install OpenSSH config
       copy:
         force: yes

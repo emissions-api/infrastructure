@@ -6,11 +6,9 @@ This repository contains the files and descriptions to setup the infrastructure 
 
 ### Prerequisites
 
-This setup is based on [Debian 10](https://www.debian.org/index.de.html), aka. *Buster*.
+This setup should be used on AWS with [Amazon Linux 2](https://aws.amazon.com/amazon-linux-2/).
 
 For a nearly full automated setup we are using [Ansible](https://www.ansible.com/).
-So you will need to have Ansible installed on your system and on the remote machine you will need to have SSH access,
-[Python 3](https://www.python.org/) installed and you have to be able to execute commands as `root`.
 
 ### Installation
 

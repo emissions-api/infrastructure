@@ -11,7 +11,7 @@
   tasks:
     - name: install base tools
       become: true
-      apt:
+      package:
         name:
           - vim
           - zsh
@@ -23,7 +23,7 @@
       become: true
       user:
         name: '{{ item }}'
-        groups: sudo
+        groups: wheel
         append: true
       loop: '{{ admins }}'
 
@@ -35,10 +35,10 @@
         key: "{{ lookup('file', 'pub-keys/{{ item }}.pub') }}"
       loop: '{{ admins }}'
 
-    - name: allow wheel to sudo without a password
+    - name: allow to sudo without a password
       become: true
       copy:
         dest: /etc/sudoers.d/password-less-sudo
         mode: 0600
-        content: "%sudo ALL=(ALL) NOPASSWD: ALL"
+        content: "%wheel ALL=(ALL) NOPASSWD: ALL"
         force: yes

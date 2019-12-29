@@ -6,16 +6,15 @@
     - secret-vars.yml
   tasks:
     - name: install needed software
-      apt:
+      package:
         name:
+          - gcc
           - git
+          - cmake3
           - python3
-          - python3-venv
-          - python3-dev
-          - build-essential
-          - libcurl4-gnutls-dev
-          - libgnutls28-dev
-          - libpq-dev
+          - python3-devel
+          - postgresql-devel
+          - libcurl-devel
 
     - name: create Emissions-API user
       user:
@@ -42,6 +41,13 @@
       args:
         creates: /opt/emissions-api/emissions-api
 
+    # Workaround for python h3. It is using cmake > 3.1 which is called cmake3 on Amazon Linux 2
+    - name: link cmake to cmake3
+      file:
+        state: link
+        path: /bin/cmake
+        src: /bin/cmake3
+
     - name: install Emissions-API requirements
       become_user: emissions-api
       command: /opt/emissions-api/env/bin/pip install -r /opt/emissions-api/emissions-api/requirements.txt
@@ -51,13 +57,8 @@
         content: |
             ---
 
-            database: postgresql://emissionsapi:{{ database_emissionsapi_password }}@127.0.0.1/emissionsapi
+            database: postgresql://emissionsapi:{{ database_emissionsapi_password }}@emissionsapi.cngmrqlbn8p2.us-east-2.rds.amazonaws.com/emissionsapi
             storage: /opt/emissionsapi/data
-            download:
-              date:
-                begin: '2019-02-1T00:00:00.000Z'
-                end: '2019-03-01T00:00:00.000Z'
-              country:
         dest: /opt/emissions-api/emissions-api/emissionsapi.yml
         force: yes
         owner: emissions-api
@@ -74,7 +75,7 @@
             Description=Emissions API Web Service
 
             [Service]
-            ExecStart=/opt/emissions-api/env/bin/gunicorn --workers 4 emissionsapi.web:app
+            ExecStart=/opt/emissions-api/env/bin/gunicorn --workers 4 --timeout 120 emissionsapi.web:app
             WorkingDirectory=/opt/emissions-api/emissions-api/
             User=emissions-api
             RestartSec=5
