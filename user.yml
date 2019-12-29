@@ -8,14 +8,26 @@
       - lars
 
   tasks:
+
+    - name: add EPEL repository on CentOS
+      become: yes
+      package:
+        name: epel-release
+      when: ansible_distribution == 'CentOS'
+
     - name: install base tools
       become: true
-      apt:
+      package:
         name:
           - vim
           - zsh
           - htop
           - iotop
+
+    - name: ensure sudo group exists
+      become: true
+      group:
+        name: sudo
 
     - name: create admin users
       become: true
@@ -33,7 +45,7 @@
         key: "{{ lookup('file', 'pub-keys/{{ item }}.pub') }}"
       loop: '{{ admins }}'
 
-    - name: allow wheel to sudo without a password
+    - name: allow to sudo without a password
       become: true
       copy:
         dest: /etc/sudoers.d/password-less-sudo
