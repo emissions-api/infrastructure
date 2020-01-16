@@ -6,6 +6,7 @@
       - sven
       - hendrik
       - lars
+      - simon
 
   tasks:
     - name: install base tools
@@ -16,6 +17,7 @@
           - zsh
           - htop
           - iotop
+          - mc
 
     - name: create admin users
       become: true
