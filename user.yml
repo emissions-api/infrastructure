@@ -12,6 +12,7 @@
     - name: install base tools
       become: true
       apt:
+        update_cache: true
         name:
           - vim
           - zsh

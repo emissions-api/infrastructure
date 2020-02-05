@@ -32,16 +32,3 @@
             account default : mailbox
         dest: /etc/msmtprc
         mode: 0600
-      notify: restart mstmp
-
-    - name: start and enable msmtpd
-      service:
-        name: msmtpd
-        enabled: yes
-        state: started
-
-  handlers:
-    - name: restart mstmp
-      service:
-        name: msmtpd
-        state: restarted
