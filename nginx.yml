@@ -5,10 +5,12 @@
   tasks:
     - name: install needed amazon extras
       command: amazon-linux-extras install nginx1 epel
+      when: ansible_distribution == "Amazon"
 
     - name: install needed software
       package:
         name:
+          - nginx
           - certbot
           - python-certbot-nginx
 
