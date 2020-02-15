@@ -74,7 +74,7 @@
             ---
 
             database: postgresql://emissionsapi:{{ database_emissionsapi_password }}@{{database_hostname | default("127.0.0.1")}}/emissionsapi
-            storage: /opt/emissionsapi/data
+            storage: /opt/emissions-api/data/
         dest: /opt/emissions-api/emissions-api/emissionsapi.yml
         force: yes
         owner: emissions-api
