@@ -1,5 +1,7 @@
 ---
 
+- import_playbook: postgresql.yml
+  when: skip_database is not defined or not skip_database
 - import_playbook: emissions-api.yml
 - import_playbook: openssh.yml
 - import_playbook: nginx.yml

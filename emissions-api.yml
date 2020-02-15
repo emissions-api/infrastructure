@@ -8,13 +8,28 @@
     - name: install needed software
       package:
         name:
-          - gcc
           - git
-          - cmake3
           - python3
-          - python3-devel
+
+    - name: install RedHat specific software
+      package:
+        name:
+          - cmake3
+          - gcc
+          - make
           - postgresql-devel
-          - libcurl-devel
+          - python3-devel
+      when: ansible_os_family == 'RedHat'
+
+    - name: install Debian specific software
+      package:
+        name:
+          - python3-venv
+          - python3-dev
+          - build-essential
+          - cmake
+          - libpq-dev
+      when: ansible_os_family == 'Debian'
 
     - name: create Emissions-API user
       user:
@@ -47,6 +62,7 @@
         state: link
         path: /bin/cmake
         src: /bin/cmake3
+      when: ansible_distribution == "Amazon"
 
     - name: install Emissions-API requirements
       become_user: emissions-api
@@ -57,7 +73,7 @@
         content: |
             ---
 
-            database: postgresql://emissionsapi:{{ database_emissionsapi_password }}@emissionsapi.cngmrqlbn8p2.us-east-2.rds.amazonaws.com/emissionsapi
+            database: postgresql://emissionsapi:{{ database_emissionsapi_password }}@{{database_hostname | default("127.0.0.1")}}/emissionsapi
             storage: /opt/emissionsapi/data
         dest: /opt/emissions-api/emissions-api/emissionsapi.yml
         force: yes

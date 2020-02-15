@@ -1,6 +1,7 @@
 ---
 
 - hosts: server
+  become: true
   vars:
     admins:
       - sven
@@ -9,8 +10,12 @@
       - simon
 
   tasks:
+    - name: install epel
+      package:
+        name: epel-release
+      when: ansible_os_family == "RedHat"
+
     - name: install base tools
-      become: true
       package:
         name:
           - vim
@@ -20,15 +25,13 @@
           - mc
 
     - name: create admin users
-      become: true
       user:
         name: '{{ item }}'
-        groups: wheel
+        groups: '{% if ansible_os_family == "RedHat"%}wheel{% else %}sudo{% endif %}'
         append: true
       loop: '{{ admins }}'
 
     - name: set up admin authorized keys
-      become: true
       authorized_key:
         user: '{{ item }}'
         state: present
@@ -36,9 +39,8 @@
       loop: '{{ admins }}'
 
     - name: allow to sudo without a password
-      become: true
       copy:
         dest: /etc/sudoers.d/password-less-sudo
         mode: 0600
-        content: "%wheel ALL=(ALL) NOPASSWD: ALL"
+        content: '%{% if ansible_os_family == "RedHat"%}wheel{% else %}sudo{% endif %} ALL=(ALL) NOPASSWD: ALL'
         force: yes

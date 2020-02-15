@@ -4,14 +4,6 @@ This repository contains the files and descriptions to setup the infrastructure 
 
 ## Setup
 
-### Prerequisites
-
-This setup should be used on AWS with [Amazon Linux 2](https://aws.amazon.com/amazon-linux-2/).
-
-For a nearly full automated setup we are using [Ansible](https://www.ansible.com/).
-
-### Installation
-
 First run the `user.yml` playbook to create the administrative user on the host.
 
 After that you can run the `setup.yml` which bundles the remaining playbooks.
