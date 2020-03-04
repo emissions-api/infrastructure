@@ -1,0 +1,12 @@
+[Unit]
+Description=Emissions API - Auto Import
+After=local-fs.target
+After=network.target
+
+[Service]
+ExecStart=/opt/emissions-api/autoupdate/autoupdate
+User=emissions-api
+Group=emissions-api
+
+[Install]
+Also=emissionsapi-import.timer

@@ -1,0 +1,41 @@
+#!/bin/sh
+
+set -uex
+
+STORAGE_DIR=/opt/emissions-api/data/
+SENTINEL5DL_DIR=/opt/emissions-api/sentinel5dl/
+EMISSIONSAPI_DIR=/opt/emissions-api/emissions-api/
+
+BEGIN="$(date -d -5days "+%Y-%m-%d")"
+END="$(date "+%Y-%m-%d")"
+
+# Step 1: Clean up old files
+for i in $(seq 6 14)
+do
+	CLEANUP_DATE="$(date -d "-${i}days" '+%Y%m%d')"
+	find "${STORAGE_DIR}" \
+		-type f \
+		-name "S5P_OFFL_L2__CO_____${CLEANUP_DATE}T*.nc*" \
+		-exec rm -v '{}' \;
+done
+
+# Step 2: Download data for the last 14 days
+(
+	cd "${SENTINEL5DL_DIR}"
+	. ./venv/bin/activate
+	python3 -m sentinel5dl \
+		--worker 1 \
+		--begin-ts "${BEGIN}" \
+		--end-ts "${END}" \
+		--mode Offline \
+		"${STORAGE_DIR}"
+)
+
+# Step 3: Import data
+(
+	cd "${EMISSIONSAPI_DIR}"
+	cd ..
+	. ./env/bin/activate
+	cd -
+	python -m emissionsapi.preprocess
+)
