@@ -19,7 +19,7 @@
         virtualenv: /opt/emissions-api/sentinel5dl/venv/
         virtualenv_command: /usr/bin/python3 -m venv
       environment:
-        PYCURL_SSL_LIBRARY: openssl
+        PYCURL_SSL_LIBRARY: "{{ 'gnutls' if ansible_os_family == 'Debian' else 'openssl' }}"
 
     - name: Ensures autoupdate dir exists
       file:
