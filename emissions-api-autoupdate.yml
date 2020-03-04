@@ -6,6 +6,15 @@
     - name: install needed software
       package:
         name: openssl-devel
+      when: ansible_os_family == 'RedHat'
+
+    - name: install needed software
+      package:
+        name:
+          - libssl-dev
+          - libcurl4-openssl-dev
+          - python-setuptools
+      when: ansible_os_family == 'Debian'
 
     - name: clone sentinel5dl repository
       become_user: emissions-api
