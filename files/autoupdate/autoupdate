@@ -9,27 +9,32 @@ EMISSIONSAPI_DIR=/opt/emissions-api/emissions-api/
 BEGIN="$(date -d -5days "+%Y-%m-%d")"
 END="$(date "+%Y-%m-%d")"
 
-# Step 1: Clean up old files
-for i in $(seq 6 14)
-do
-	CLEANUP_DATE="$(date -d "-${i}days" '+%Y%m%d')"
-	find "${STORAGE_DIR}" \
-		-type f \
-		-name "S5P_OFFL_L2__CO_____${CLEANUP_DATE}T*.nc*" \
-		-exec rm -v '{}' \;
-done
 
-# Step 2: Download data for the last 14 days
-(
-	cd "${SENTINEL5DL_DIR}"
-	. ./venv/bin/activate
-	python3 -m sentinel5dl \
-		--worker 1 \
-		--begin-ts "${BEGIN}" \
-		--end-ts "${END}" \
-		--mode Offline \
-		"${STORAGE_DIR}"
-)
+for PRODUCT in L2__CO____ L2__CH4___
+do
+	# Step 1: Clean up old files
+	for i in $(seq 6 14)
+	do
+		CLEANUP_DATE="$(date -d "-${i}days" '+%Y%m%d')"
+		find "${STORAGE_DIR}${PRODUCT}" \
+			-type f \
+			-name "S5P_OFFL_${PRODUCT}_${CLEANUP_DATE}T*.nc*" \
+			-exec rm -v '{}' \;
+	done
+
+	# Step 2: Download data for the last 14 days
+	(
+		cd "${SENTINEL5DL_DIR}"
+		. ./venv/bin/activate
+		python3 -m sentinel5dl \
+			--worker 1 \
+			--begin-ts "${BEGIN}" \
+			--end-ts "${END}" \
+			--mode Offline \
+			--product "${PRODUCT}" \
+			"${STORAGE_DIR}${PRODUCT}"
+	)
+done
 
 # Step 3: Import data
 (
