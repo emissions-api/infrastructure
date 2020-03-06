@@ -39,10 +39,14 @@
 
     - name: create data directory
       file:
-        path: /opt/emissions-api/data/
+        path: /opt/emissions-api/data/{{ item }}
+        recurse: true
         owner: emissions-api
         group: emissions-api
         state: directory
+      with_items:
+        - L2__CH4___
+        - L2__CO____
 
     - name: create python environment
       become_user: emissions-api
@@ -74,7 +78,13 @@
             ---
 
             database: postgresql://emissionsapi:{{ database_emissionsapi_password }}@{{database_hostname | default("127.0.0.1")}}/emissionsapi
-            storage: /opt/emissions-api/data/
+            products:
+              carbonmonoxide:
+                storage: /opt/emissions-api/data/L2__CO____/
+                product: carbonmonoxide_total_column
+              methane:
+                storage: /opt/emissions-api/data/L2__CH4___/
+                product: methane_mixing_ratio_bias_corrected
         dest: /opt/emissions-api/emissions-api/emissionsapi.yml
         force: yes
         owner: emissions-api
