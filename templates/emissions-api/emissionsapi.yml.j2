@@ -1,0 +1,13 @@
+---
+
+database: postgresql://emissionsapi:{{ database_emissionsapi_password }}@{{database_hostname | default("127.0.0.1")}}/emissionsapi
+products:
+  methane:
+    product: methane_mixing_ratio_bias_corrected
+    product_key: L2__CH4___
+  carbonmonoxide:
+    product: carbonmonoxide_total_column
+    product_key: L2__CO____
+  ozone:
+    product: ozone_total_vertical_column
+    product_key: L2__O3____

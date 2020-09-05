@@ -4,9 +4,12 @@ After=local-fs.target
 After=network.target
 
 [Service]
-ExecStart=/opt/emissions-api/autoupdate/autoupdate
+ExecStart=/opt/emissions-api/venv/bin/python -m emissionsapi.autoupdater
+WorkingDirectory=/opt/emissions-api/emissions-api/
 User=emissions-api
 Group=emissions-api
+Restart=on-failure
+RestartSec=5
 
 [Install]
 Also=emissionsapi-import.timer

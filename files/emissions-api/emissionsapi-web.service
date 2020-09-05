@@ -1,0 +1,12 @@
+[Unit]
+Description=Emissions API Web Service
+
+[Service]
+ExecStart=/opt/emissions-api/venv/bin/gunicorn --workers 4 --timeout 120 --log-level INFO emissionsapi.web:app
+WorkingDirectory=/opt/emissions-api/emissions-api/
+User=emissions-api
+RestartSec=5
+Restart=always
+
+[Install]
+WantedBy=multi-user.target

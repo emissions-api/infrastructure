@@ -11,6 +11,7 @@
           - git
           - python3
 
+      when: ansible_os_family == 'Debian'
     - name: install RedHat specific software
       package:
         name:
@@ -19,6 +20,7 @@
           - make
           - postgresql-devel
           - python3-devel
+          - openssl-devel
       when: ansible_os_family == 'RedHat'
 
     - name: install Debian specific software
@@ -29,6 +31,8 @@
           - build-essential
           - cmake
           - libpq-dev
+          - libssl-dev
+          - libcurl4-openssl-dev
       when: ansible_os_family == 'Debian'
 
     - name: create Emissions-API user
@@ -37,30 +41,14 @@
         system: yes
         home: /opt/emissions-api
 
-    - name: create data directory
-      file:
-        path: /opt/emissions-api/data/{{ item }}
-        recurse: true
-        owner: emissions-api
-        group: emissions-api
-        state: directory
-      with_items:
-        - L2__CH4___
-        - L2__CO____
-
-    - name: create python environment
-      become_user: emissions-api
-      command: python3 -m venv /opt/emissions-api/env
-      args:
-        creates: /opt/emissions-api/env
-
     - name: clone Emissions-API repository
       become_user: emissions-api
-      command: git clone https://github.com/emissions-api/emissions-api.git /opt/emissions-api/emissions-api
-      args:
-        creates: /opt/emissions-api/emissions-api
+      git:
+        repo: https://github.com/emissions-api/emissions-api.git
+        dest: /opt/emissions-api/emissions-api/
 
-    # Workaround for python h3. It is using cmake > 3.1 which is called cmake3 on Amazon Linux 2
+    # Workaround for python h3.
+    # It is using cmake > 3.1 which is called cmake3 on Amazon Linux 2
     - name: link cmake to cmake3
       file:
         state: link
@@ -68,24 +56,18 @@
         src: /bin/cmake3
       when: ansible_distribution == "Amazon"
 
-    - name: install Emissions-API requirements
-      become_user: emissions-api
-      command: /opt/emissions-api/env/bin/pip install -r /opt/emissions-api/emissions-api/requirements.txt
+    - name: install requirements
+      pip:
+        requirements: /opt/emissions-api/emissions-api/requirements.txt
+        virtualenv: /opt/emissions-api/venv/
+        virtualenv_command: /usr/bin/python3 -m venv
+      environment:
+        PYCURL_SSL_LIBRARY: openssl
 
     - name: install Emissions-API config file
-      copy:
-        content: |
-            ---
-
-            database: postgresql://emissionsapi:{{ database_emissionsapi_password }}@{{database_hostname | default("127.0.0.1")}}/emissionsapi
-            products:
-              carbonmonoxide:
-                storage: /opt/emissions-api/data/L2__CO____/
-                product: carbonmonoxide_total_column
-              methane:
-                storage: /opt/emissions-api/data/L2__CH4___/
-                product: methane_mixing_ratio_bias_corrected
+      template:
         dest: /opt/emissions-api/emissions-api/emissionsapi.yml
+        src: emissions-api/emissionsapi.yml.j2
         force: yes
         owner: emissions-api
         group: emissions-api
@@ -93,32 +75,36 @@
       notify:
         restart emissionsapi-web
 
+    - name: install systemd files
+      copy:
+        dest: /etc/systemd/system/
+        src: emissions-api/{{ item }}
+        force: yes
+        mode: 0644
+      loop:
+        - emissionsapi-import.service
+        - emissionsapi-import.timer
+      notify:
+        - reload systemd
+
     - name: install Emissions-API service file
       copy:
-        dest: /lib/systemd/system/emissionsapi-web.service
-        content: |
-            [Unit]
-            Description=Emissions API Web Service
-
-            [Service]
-            ExecStart=/opt/emissions-api/env/bin/gunicorn --workers 4 --timeout 120 emissionsapi.web:app
-            WorkingDirectory=/opt/emissions-api/emissions-api/
-            User=emissions-api
-            RestartSec=5
-            Restart=always
-
-            [Install]
-            WantedBy=multi-user.target
+        dest: /etc/systemd/system/
+        src: emissions-api/emissionsapi-web.service
         force: yes
+        mode: 0644
       notify:
         - reload systemd
         - restart emissionsapi-web
 
     - name: run Emissions-API now and on boot
       service:
-        name: emissionsapi-web
+        name: '{{ item }}'
         enabled: yes
         state: started
+      with_items:
+        - emissionsapi-web
+        - emissionsapi-import.timer
 
   handlers:
     - name: reload systemd
