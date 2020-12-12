@@ -5,10 +5,8 @@
   vars:
     admins:
       - sven
-      - hendrik
       - lars
-      - simon
-      - tiuti 
+      - tiuti
 
   tasks:
     - name: install epel
