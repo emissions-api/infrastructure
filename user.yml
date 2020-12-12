@@ -7,6 +7,7 @@
       - sven
       - lars
       - tiuti
+    admin_group: '{% if ansible_os_family == "RedHat"%}wheel{% else %}sudo{% endif %}'
 
   tasks:
     - name: install epel
@@ -26,7 +27,7 @@
     - name: create admin users
       user:
         name: '{{ item }}'
-        groups: '{% if ansible_os_family == "RedHat"%}wheel{% else %}sudo{% endif %}'
+        groups: '{{ admin_group }}'
         append: true
       loop: '{{ admins }}'
 
@@ -41,5 +42,5 @@
       copy:
         dest: /etc/sudoers.d/password-less-sudo
         mode: 0600
-        content: '%{% if ansible_os_family == "RedHat"%}wheel{% else %}sudo{% endif %} ALL=(ALL) NOPASSWD: ALL'
+        content: '%{{ admin_group }} ALL=(ALL) NOPASSWD: ALL'
         force: yes
