@@ -8,7 +8,7 @@
       - hendrik
       - lars
       - simon
-      - timo
+      - tiuti 
 
   tasks:
     - name: install epel
