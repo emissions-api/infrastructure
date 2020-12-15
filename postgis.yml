@@ -1,0 +1,13 @@
+---
+
+- hosts: server
+  become: yes
+  vars_files:
+    - secret-vars.yml
+  roles:
+    - name: setup database postgis
+      role: postgis
+      vars:
+        postgis_database: emissionsapi
+        postgis_database_user: emissionsapi
+        postgis_database_password: '{{ database_emissionsapi_password }}'

@@ -1,0 +1,3 @@
+---
+
+service: '{% if ansible_os_family == "RedHat"%}postgresql-12{% else %}postgresql{% endif %}'

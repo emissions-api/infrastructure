@@ -1,0 +1,39 @@
+---
+
+- name: fail early if variables are not set properly
+  assert:
+    that: '{{ item }} is defined'
+  with_items:
+    - postgis_database
+    - postgis_database_user
+    - postgis_database_password
+
+- name: create postgresql user
+  become: yes
+  become_user: postgres
+  postgresql_user:
+    user: '{{ postgis_database_user }}'
+    password: '{{ postgis_database_password }}'
+    encrypted: yes
+
+- name: create database
+  become: yes
+  become_user: postgres
+  postgresql_db:
+    name: '{{ postgis_database }}'
+    owner: '{{ postgis_database_user }}'
+
+- name: enable PostGIS extensions
+  become: yes
+  become_user: postgres
+  postgresql_ext:
+    db: '{{ postgis_database }}'
+    name: '{{ item }}'
+  loop:
+    - postgis
+    - postgis_topology
+    - postgis_sfcgal
+    - fuzzystrmatch
+    - address_standardizer
+    - address_standardizer_data_us
+    - postgis_tiger_geocoder

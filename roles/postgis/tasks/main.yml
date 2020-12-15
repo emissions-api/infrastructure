@@ -1,0 +1,10 @@
+- name: install the correct web server for RHEL
+  import_tasks: redhat.yml
+  when: ansible_facts['os_family'] == 'RedHat'
+
+- name: install for Debian
+  import_tasks: debian.yml
+  when: ansible_facts['os_family']== 'Debian'
+
+- name: setup database
+  import_tasks: database.yml
