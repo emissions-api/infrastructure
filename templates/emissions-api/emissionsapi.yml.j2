@@ -1,5 +1,5 @@
 ---
-
+workers: 16
 database: postgresql://emissionsapi:{{ database_emissionsapi_password }}@{{database_hostname | default("127.0.0.1")}}/emissionsapi
 products:
   methane:
