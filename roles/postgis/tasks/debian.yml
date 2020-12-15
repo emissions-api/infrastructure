@@ -1,0 +1,15 @@
+---
+
+- name: install needed software
+  apt:
+    name:
+      - postgresql
+      - postgis
+      - python-psycopg2
+
+- name: configure PostgreSQL
+  copy:
+    src: pgtune.conf
+    dest: /etc/postgresql/11/main/conf.d/pgtune.conf
+  notify:
+    - restart postgresql

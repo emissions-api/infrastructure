@@ -1,0 +1,62 @@
+---
+# see https://people.planetpostgresql.org/devrim/index.php?/archives/100-Installing-PostgreSQL-on-RHEL-8.html
+
+- name: install epel repositories
+  dnf:
+    name: epel-release
+
+- name: disable postgresql module
+  command:
+    cmd: dnf -qy module disable postgresql
+    warn: false
+
+- name: enable PowerTools
+  command:
+    cmd: dnf -y config-manager --set-enabled powertools
+    warn: false
+
+- name: install postgresql repository package
+  dnf:
+    name: https://download.postgresql.org/pub/repos/yum/reporpms/EL-8-x86_64/pgdg-redhat-repo-latest.noarch.rpm
+    disable_gpg_check: true
+
+- name: install database releated software
+  dnf:
+    name:
+      - postgis30_12
+      - postgresql12-server
+      - python3-psycopg2
+
+- name: init database
+  command: /usr/pgsql-12/bin/postgresql-12-setup initdb
+  args:
+    creates: /var/lib/pgsql/12/initdb.log
+
+- name: include line in postgresql.conf
+  lineinfile:
+    path: /var/lib/pgsql/12/data/postgresql.conf
+    line: "include = '/var/lib/pgsql/12/data/pgtune.conf'"
+  notify:
+    - restart postgresql
+
+- name: allow emissionsapi access to database via localhost and password
+  lineinfile:
+    path: /var/lib/pgsql/12/data/pg_hba.conf
+    insertafter: "# TYPE  DATABASE        USER            ADDRESS                 METHOD"
+    line: "host    emissionsapi    emissionsapi    127.0.0.1/32            md5"
+  notify:
+    - restart postgresql
+
+
+- name: configure PostgreSQL
+  copy:
+    src: pgtune.conf
+    dest: /var/lib/pgsql/12/data/pgtune.conf
+  notify:
+    - restart postgresql
+
+- name: start and enable postgresql
+  service:
+    name: '{{ service }}'
+    enabled: true
+    state: started
