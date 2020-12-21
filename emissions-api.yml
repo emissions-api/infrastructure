@@ -4,28 +4,31 @@
   become: yes
   vars_files:
     - secret-vars.yml
+  vars:
+    python_binary: '{% if ansible_os_family == "RedHat"%}python3.8{% else %}python{% endif %}'
   tasks:
     - name: install needed software
       package:
         name:
           - git
-          - python3
 
-      when: ansible_os_family == 'Debian'
     - name: install RedHat specific software
       package:
         name:
           - cmake3
           - gcc
           - make
-          - postgresql-devel
-          - python3-devel
+          - libcurl-devel
+          - python38-devel
+          - python38
+          - postgresql12-devel
           - openssl-devel
       when: ansible_os_family == 'RedHat'
 
     - name: install Debian specific software
       package:
         name:
+          - python3
           - python3-venv
           - python3-dev
           - build-essential
@@ -60,15 +63,15 @@
       pip:
         requirements: /opt/emissions-api/emissions-api/requirements.txt
         virtualenv: /opt/emissions-api/venv/
-        virtualenv_command: /usr/bin/python3 -m venv
+        virtualenv_command: /usr/bin/{{ python_binary }} -m venv
       environment:
         PYCURL_SSL_LIBRARY: openssl
+        PATH: '{{ ansible_env.PATH }}:/usr/pgsql-12/bin'
 
     - name: install Emissions-API config file
       template:
         dest: /opt/emissions-api/emissions-api/emissionsapi.yml
         src: emissions-api/emissionsapi.yml.j2
-        force: yes
         owner: emissions-api
         group: emissions-api
         mode: 0600
