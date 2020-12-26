@@ -7,12 +7,30 @@
       command: amazon-linux-extras install nginx1 epel
       when: ansible_distribution == "Amazon"
 
+    - name: permit traffic in default zone for https service
+      ansible.posix.firewalld:
+        service: '{{ item }}'
+        permanent: true
+        immediate: true
+        state: enabled
+      with_items:
+        - http
+        - https
+      when: ansible_os_family == "RedHat"
+
     - name: install needed software
       package:
         name:
           - nginx
           - certbot
-          - python-certbot-nginx
+          - python3-certbot-nginx
+      when: ansible_os_family == "RedHat"
+
+    - name: Set httpd_can_network_connect flag
+      seboolean:
+        name: httpd_can_network_connect
+        state: true
+        persistent: true
 
     - name: nginx enabled and started
       service:
