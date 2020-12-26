@@ -24,6 +24,10 @@
           - iotop
           - mc
 
+    - name: install for RedHat only
+      dnf:
+        name: policycoreutils-python-utils
+
     - name: create admin users
       user:
         name: '{{ item }}'
