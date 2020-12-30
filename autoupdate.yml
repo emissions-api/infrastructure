@@ -1,0 +1,28 @@
+---
+# vim: et:ts=2:sw=2:sts=2
+
+- hosts: server
+  become: yes
+  tasks:
+    - name: install dnf-automatic
+      package:
+        name: dnf-automatic
+
+    - name: configure automatic updates
+      lineinfile:
+        path: /etc/dnf/automatic.conf
+        regexp: '^{{ item.key }}'
+        line: '{{ item.key }} = {{ item.val }}'
+      loop:
+        - key: upgrade_type
+          val: default
+        - key: download_updates
+          val: yes
+        - key: apply_updates
+          val: yes
+
+    - name: enable automatic updates
+      service:
+        name: dnf-automatic.timer
+        state: started
+        enabled: yes
