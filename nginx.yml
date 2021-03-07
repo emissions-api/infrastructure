@@ -44,6 +44,12 @@
         creates: /etc/letsencrypt/live/{{ ansible_host }}/cert.pem
       notify: reload nginx
 
+    - name: certbot-renew enabled and started
+      service:
+        name: certbot-renew.timer
+        state: started
+        enabled: true
+
     - name: install diffie hellmann paramter
       copy:
         src: nginx/dhparam.pem
