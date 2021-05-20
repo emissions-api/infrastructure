@@ -1,0 +1,20 @@
+---
+
+- hosts: server
+  become: yes
+  tasks:
+    - name: enable copr repository for prometheus
+      command:
+        cmd: dnf copr enable -y lkiesow/prometheus
+        creates: /etc/yum.repos.d/_copr:copr.fedorainfracloud.org:lkiesow:prometheus.repo
+        warn: false
+
+    - name: install dependencies
+      dnf:
+        name: node_exporter
+
+    - name: start and enable node_exporter
+      service:
+        name: node_exporter
+        state: started
+        enabled: true

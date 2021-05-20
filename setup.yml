@@ -4,3 +4,4 @@
   when: skip_database is not defined or not skip_database
 - import_playbook: emissions-api.yml
 - import_playbook: nginx.yml
+- import_playbook: nodeexporter.yml

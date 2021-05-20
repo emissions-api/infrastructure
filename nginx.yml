@@ -2,6 +2,8 @@
 
 - hosts: server
   become: yes
+  vars_files:
+    - secret-vars.yml
   tasks:
     - name: install needed amazon extras
       command: amazon-linux-extras install nginx1 epel
@@ -24,6 +26,7 @@
           - nginx
           - certbot
           - python3-certbot-nginx
+          - python3-passlib
       when: ansible_os_family == "RedHat"
 
     - name: Set httpd_can_network_connect flag
@@ -62,6 +65,16 @@
         dest: /etc/nginx/conf.d/server.conf
         src: nginx/server.conf
         force: yes
+      notify: reload nginx
+
+    - name: create prometheus api user
+      htpasswd:
+        path: /etc/nginx/.htpasswd
+        name: '{{ prometheus.user }}'
+        password: '{{ prometheus.password }}'
+        owner: root
+        group: '{{ "www-data" if ansible_os_family == "Debian" else "nginx" }}'
+        mode: 0640
       notify: reload nginx
 
   handlers:
