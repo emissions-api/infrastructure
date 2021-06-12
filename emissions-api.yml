@@ -49,6 +49,8 @@
       git:
         repo: https://github.com/emissions-api/emissions-api.git
         dest: /opt/emissions-api/emissions-api/
+      notify:
+        restart emissionsapi-web
 
     # Workaround for python h3.
     # It is using cmake > 3.1 which is called cmake3 on Amazon Linux 2
