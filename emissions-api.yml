@@ -15,7 +15,7 @@
     - name: install RedHat specific software
       package:
         name:
-          - cmake3
+          - cmake
           - gcc
           - make
           - libcurl-devel
