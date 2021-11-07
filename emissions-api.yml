@@ -49,6 +49,8 @@
       git:
         repo: https://github.com/emissions-api/emissions-api.git
         dest: /opt/emissions-api/emissions-api/
+        update: true
+        version: main
       notify:
         restart emissionsapi-web
 
