@@ -3,18 +3,18 @@ workers: 16
 database: postgresql://emissionsapi:{{ database_emissionsapi_password }}@{{database_hostname | default("127.0.0.1")}}/emissionsapi
 products:
   methane:
-	 description: Dry-air mixing ratio of methane for cloud-free observations with a spatial resolution of 7x7km2 observed at about 13:30 local solar time from spectra measured by TROPOMI
+	 description: Dry-air mixing ratio of methane for cloud-free observations with a spatial resolution of 7x7km2 observed at about 13:30 local solar time from spectra measured by TROPOMI, total column
     product: methane_mixing_ratio_bias_corrected
     product_key: L2__CH4___
   carbonmonoxide:
-	 description: Average atmosphere mole content of carbon monoxide in `mol m¯²`
+	 description: Atmospheric content of carbon monoxide in `mol m¯²`, total column
     product: carbonmonoxide_total_column
     product_key: L2__CO____
   ozone:
-	 description: Average atmosphere mole content of ozone in `mol m¯²`
+	 description: Atmospheric content of ozone in `mol m¯²`, total column
     product: ozone_total_vertical_column
     product_key: L2__O3____
   nitrogendioxide:
-	 description: Nitrogen dioxide tropospheric column with a spatial resolution of 7x3.5km2 observed at about 13:30 local solar time from spectra measured by TROPOMI
+	 description: Nitrogen dioxide tropospheric column with a spatial resolution of 7x3.5km2 observed at about 13:30 local solar time from spectra measured by TROPOMI, total column
     product: nitrogendioxide_tropospheric_column
     product_key: L2__NO2___
